@@ -6,5 +6,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/Akka"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/aeron-driver"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/aeron-client"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Agrona"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

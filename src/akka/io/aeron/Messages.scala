@@ -29,3 +29,6 @@ case class Bound()
 case class BindFailure()
 
 case class Failure()
+
+
+case class Write(body : String)
