@@ -13,8 +13,6 @@ Basically enables Aeron to be used directly from your standard Akka actor system
 ##The Next steps
 All my todo stuff
 
-- Creating actor per Aeron "connection" differ between publish/subscribe
-
 
 ##Design considerations
 
@@ -33,7 +31,28 @@ Defaults goal is to enable the "simplest" setup which can be tuned afterwards
 - Aeron driver strategy => BackOffIdleStrategy more to come...
 
 
+##Decision guide on which communication scheme to use from AKKA
+TODO....
+Assumptions
+- Distributed system accross multiple servers
+Following factors affect decision
 
+Throughput (msgs/s)
+
+Latency (how fast will a message go from sender to receiver)
+
+Connections / subscribers
+
+Openness / Lockin
+
+Reliability is a must
+
+- Remote Actors
+- TCP
+- UDP
+- Aeron
+- HTTP
+- Streams?
 
  
 

@@ -19,12 +19,22 @@ class AeronManager extends Actor {
 
   def receive: Actor.Receive = {
     //Connect to a new address as a client
-    case Connect(address, connectType) => {
+    case Connect(address,port, connectType) => {
 
       connectType match {
         case ALL => {
-          val ctx = new Aeron.Context()
+          val ctx = new Aeron.Context().
+            //Create connection handler
+            newConnectionHandler(
+              (channel: String, streamid: Int, sessionid: Int, sourceinfo: String) => newPongConnectionHandler(channel, streamid, sessionid, sourceinfo))
+
+          //TODO: ignore fragmentassembler
+
+          val aeron = Aeron.connect(ctx)
+          val channel = "udp://"+address+":"+port
+          val publication = aeron.addPublication(channel, streamid)
           
+
         }
         case PUBLISH => {
 
@@ -36,10 +46,10 @@ class AeronManager extends Actor {
     }
   }
 
-  val channel = "channel1";
+  val channel = "udp://localhost:8089";
   val streamid = 1
   val PONG_CONNECTION_LATCH = new CountDownLatch(1)
-  
+
   private def newPongConnectionHandler(channel: String, streamId: Int, sessionId: Int, sourceInfo: String) {
     if (channel.equals(channel) && streamid == streamId) {
       PONG_CONNECTION_LATCH.countDown();

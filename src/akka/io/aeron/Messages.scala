@@ -10,7 +10,9 @@ case object PUBLISH extends ConnectType
 case object SUBSCRIBE extends ConnectType
 
 //Connecting from client side
-case class Connect(address: InetSocketAddress, connectType: ConnectType = ALL)
+case class Connect(address : String, port : Int, connectType: ConnectType = ALL) {
+  //TODO: possibly we should enabled other ways to give an channel name
+}
 
 //
 case class Connected(remote: InetSocketAddress, local: InetSocketAddress)
