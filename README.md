@@ -33,10 +33,12 @@ Defaults goal is to enable the "simplest" setup which can be tuned afterwards
 
 ##Decision guide on which communication scheme to use from AKKA
 TODO....
-Assumptions
+
+###Assumptions
 - Distributed system accross multiple servers
 Following factors affect decision
 
+###factors
 Throughput (msgs/s)
 
 Latency (how fast will a message go from sender to receiver)
@@ -47,6 +49,7 @@ Openness / Lockin
 
 Reliability is a must
 
+###Types
 - Remote Actors
 - TCP
 - UDP
