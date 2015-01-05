@@ -29,6 +29,7 @@ Defaults goal is to enable the "simplest" setup which can be tuned afterwards
 - Communication direction => Both
 - Aeron network driver => Embedded
 - Aeron driver strategy => BackOffIdleStrategy more to come...
+- Aeron pooling numbers - adjusting based on load (some clever way)
 
 
 ##Decision guide on which communication scheme to use from AKKA

@@ -8,6 +8,7 @@ import uk.co.real_logic.agrona.concurrent.UnsafeBuffer
 import uk.co.real_logic.aeron.Publication
 import uk.co.real_logic.aeron.common.concurrent.logbuffer.Header
 import uk.co.real_logic.agrona.DirectBuffer
+import uk.co.real_logic.aeron.common.concurrent.logbuffer.DataHandler
 
 /**
  * Represents a connection in Aeron context this would be either subscribe,
@@ -24,14 +25,15 @@ class AeronConnection(connectType: ConnectType, config: AeronSetup) extends Acto
   private[this] var channel = "";
 
   def receive: Actor.Receive = {
-    ???
+    case _ => ()
   }
 
   def all: Actor.Receive = {
+    case other: String => println("received:" + other)
     //TODO: indirection could also be improved here
-    case Write(body) => {
-      publication.offer(BUFFER, 0, body.getBytes().length);
-    }
+    //    case Write(body) => {
+    //      publication.offer(BUFFER, 0, body.getBytes().length);
+    //    }
     case msg => {
       ???
     }
@@ -49,15 +51,18 @@ class AeronConnection(connectType: ConnectType, config: AeronSetup) extends Acto
    * Setup behavior based on constructor arguments
    */
   override def preStart() {
+    setupContext()
     connectType match {
       case ALL => {
-        context.become(subscribe)
+        context.become(all)
+        createSubscriberHandler()
       }
       case PUBLISH => {
         context.become(subscribe)
       }
       case SUBSCRIBE => {
         context.become(subscribe)
+        createSubscriberHandler()
       }
     }
   }
@@ -71,9 +76,9 @@ class AeronConnection(connectType: ConnectType, config: AeronSetup) extends Acto
 
     //TODO: ignore fragmentassembler
 
-    val aeron = Aeron.connect(ctx)
+    //    val aeron = Aeron.connect(ctx)
     channel = "udp://" + config.address + ":" + config.port
-    publication = aeron.addPublication(channel, config.streamID)
+    //    publication = aeron.addPublication(channel, config.streamID)
 
   }
 
@@ -88,20 +93,33 @@ class AeronConnection(connectType: ConnectType, config: AeronSetup) extends Acto
           inactiveConnectionHandler((channel: String, streamid: Int, sessionid: Int) =>
             onInactiveConnection(channel, streamid, sessionid))
 
-        val datahandler = null
+        val streamId = config.streamID
+        val datahandler: DataHandler =
+          ((buffer: DirectBuffer, offset: Int, length: Int, header: Header) =>
+            handleChannelMessage(streamId, buffer, offset, length, header))
+        Thread.sleep(2000)
+        val aeron = Aeron.connect(ctx)
+
+        val subscription = aeron.addSubscription(channel, config.streamID, datahandler)
+        while (true) {
+          //TODO: some tuning / config could be done here
+          subscription.poll(5);
+        }
 
       }
     }
-
+    thread.start()
   }
 
-  private def handleChannelMessage(streamID: Int, buffer: DirectBuffer, offset: Int, length: Int, header: Header) {
+  private def handleChannelMessage(streamId: Int, buffer: DirectBuffer, offset: Int, length: Int, header: Header) {
     val data = new Array[Byte](length);
     buffer.getBytes(offset, data);
 
+    val t= Array(streamId, header.sessionId(), length, offset, new String(data)).asInstanceOf[Array[AnyRef]]
     println(String.format(
-      "message to stream %d from session %x (%d@%d) <<%s>>", 
-      Array(streamID, header.sessionId(), length, offset, new String(data))));
+      "message to stream %d from session %x (%d@%d) <<%s>>",  t : _*))
+
+    self ! new String(data)
   }
 
   private def newConnectionHandler(channel: String, streamId: Int, sessionId: Int, sourceInfo: String) {
